@@ -1,0 +1,119 @@
+{% extends "teacher/base.html" %}
+{% block title %}Teacher Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between mb-4">
+    <h2>Teacher Dashboard</h2>
+    <div class="text-muted">
+        {% if current_semester %}
+            Semester: {{ current_semester.name }}
+        {% else %}
+            No active semester
+        {% endif %}
+    </div>
+</div>
+
+<div class="row">
+    <!-- Teaching Sections -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">Teaching Sections</h5>
+            </div>
+            <div class="card-body">
+                {% if current_courses %}
+                    <div class="list-group">
+                        {% for course in current_courses %}
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ course.title }}</h6>
+                                    <small></small>
+                                </div>
+                                <small class="text-muted">Section {{ course.section_id }} • {{ course.section_number }} • {{ course.name }}</small>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No assigned sections this semester</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Upcoming Assignments -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="card-title mb-0">Upcoming Assignments</h5>
+            </div>
+            <div class="card-body">
+                {% if upcoming_assignments %}
+                    <div class="list-group">
+                        {% for assignment in upcoming_assignments %}
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ assignment.title }}</h6>
+                                    <small>{{ assignment.due_date.strftime('%b %d, %Y') }}</small>
+                                </div>
+                                <p class="mb-1">{{ assignment.course_title }}</p>
+                                <small class="text-muted">Section {{ assignment.section_id }} </small>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No upcoming assignments</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Announcements -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-success text-white">
+                <h5 class="card-title mb-0">Recent Announcements</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_announcements %}
+                    <ul class="list-group">
+                        {% for announcement in recent_announcements %}
+                            <li class="list-group-item">
+                                <strong>{{ announcement.title }}</strong><br>
+                                <small class="text-muted">{{ announcement.created_at.strftime('%b %d, %Y') }}</small>
+                                <p class="mb-0">{{ announcement.message }}</p>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">No recent announcements</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Office Hours -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0">Office Hours</h5>
+            </div>
+            <div class="card-body">
+                {% if office_hours %}
+                    <ul class="list-group">
+                        {% for hour in office_hours %}
+                            <li class="list-group-item">
+                                {{ hour.title }} • {{ hour.day }} • {{ hour.start_time }}–{{ hour.end_time }}<br>
+                                <small class="text-muted">Location: {{ hour.location }}</small>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">No office hours set</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

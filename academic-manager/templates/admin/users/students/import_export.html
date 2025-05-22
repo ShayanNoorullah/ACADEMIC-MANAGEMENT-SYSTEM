@@ -1,0 +1,56 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Student Import/Export{% endblock %}
+{% block header %}Student Import/Export{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Export Section -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Export Students</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('export_students') }}">
+                    <div class="mb-3">
+                        <label class="form-label">Export Format</label>
+                        <select class="form-select" name="export_format">
+                            <option value="csv">CSV</option>
+                            <option value="json">JSON</option>
+                            <option value="excel">Excel</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-download"></i> Export Students
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Section -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Import Students</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('import_students') }}" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="import_file" class="form-label">Select File</label>
+                        <input class="form-control" type="file" id="import_file" name="file" accept=".csv,.xlsx,.json">
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="update_existing" name="update_existing">
+                        <label class="form-check-label" for="update_existing">Update existing students</label>
+                    </div>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-upload"></i> Import Students
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

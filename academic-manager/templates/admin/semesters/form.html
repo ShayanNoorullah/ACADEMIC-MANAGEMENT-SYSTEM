@@ -1,0 +1,49 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if semester %}Edit Semester{% else %}Create Semester{% endif %}{% endblock %}
+{% block header %}{% if semester %}Edit Semester{% else %}Create New Semester{% endif %}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <form method="post">
+            <div class="mb-3">
+                <label for="name" class="form-label">Semester Name</label>
+                <input type="text" class="form-control" id="name" name="name" 
+                       value="{{ semester.name if semester else '' }}" required>
+                <small class="text-muted">e.g., Fall 2023, Spring 2024</small>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="start_date" class="form-label">Start Date</label>
+                    <input type="date" class="form-control" id="start_date" name="start_date" 
+                           value="{{ semester.start_date if semester else '' }}" required>
+                </div>
+                <div class="col-md-6">
+                    <label for="end_date" class="form-label">End Date</label>
+                    <input type="date" class="form-control" id="end_date" name="end_date" 
+                           value="{{ semester.end_date if semester else '' }}" required>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="max_credits" class="form-label">Maximum Credits</label>
+                <input type="number" class="form-control" id="max_credits" name="max_credits" 
+                       value="{{ semester.max_credits if semester else '18' }}" min="12" max="24" required>
+            </div>
+            
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="is_current" name="is_current" 
+                       {% if semester and semester.is_current %}checked{% endif %}>
+                <label class="form-check-label" for="is_current">Set as current semester</label>
+            </div>
+            
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('admin_semesters') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

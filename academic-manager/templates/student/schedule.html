@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block title %}Weekly Schedule{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between mb-4">
+    <h2>Weekly Schedule</h2>
+    <div class="text-muted">
+        Semester: {{ current_semester.name if current_semester else "Unknown" }}
+    </div>
+</div>
+
+{% if not current_semester %}
+    <div class="alert alert-info">No active semester found.</div>
+{% else %}
+<div class="table-responsive">
+    <table class="table table-bordered schedule-table">
+        <thead class="table-dark">
+            <tr>
+                <th class="day-column">Day</th>
+                {% for hour in hours %}
+                    <th class="hour-column text-center">
+                        {% set display_hour = hour % 12 %}
+                        {% if display_hour == 0 %}{% set display_hour = 12 %}{% endif %}
+                        {{ display_hour }}:00 {% if hour < 12 %}AM{% else %}PM{% endif %}
+                    </th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for day in days %}
+                <tr class="schedule-row">
+                    <td class="fw-bold day-column">{{ day }}</td>
+                    {% for hour in hours %}
+                        {% set course = schedule[day][hour] %}
+                        {% if course %}
+                            <td class="course-cell">
+                                <div class="course-card">
+                                    <div class="card-body">
+                                        <h6 class="course-title">{{ course.title }}</h6>
+                                        <div class="course-details">
+                                            <div><strong>Section:</strong> {{ course.section }}</div>
+                                            <div><strong>Time:</strong> {{ course.time }}</div>
+                                            <div><strong>Instructor:</strong> {{ course.instructor }}</div>
+                                        </div>
+                                        {% if course.is_continuation %}
+                                            <span class="continued-badge">Continued</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                        {% else %}
+                            <td class="empty-cell"></td>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<style>
+    /* Main table styling */
+    .schedule-table {
+        table-layout: fixed;
+        width: 100%;
+    }
+    
+    /* Column sizing */
+    .day-column {
+        width: 120px;  /* Wider day column */
+        min-width: 120px;
+    }
+    
+    .hour-column {
+        width: 150px;  /* Wider time slots */
+        min-width: 150px;
+    }
+    
+    /* Cell styling */
+    .course-cell {
+        height: 120px;  /* Taller cells */
+        vertical-align: top;
+        padding: 5px;
+    }
+    
+    .empty-cell {
+        height: 120px;
+        background-color: #f8f9fa;
+    }
+    
+    /* Course card styling */
+    .course-card {
+        height: 100%;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        background-color: white;
+    }
+    
+    .card-body {
+        padding: 10px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .course-title {
+        font-size: 1rem;
+        color: #0d6efd;
+        margin-bottom: 8px;
+    }
+    
+    .course-details {
+        font-size: 0.85rem;
+        flex-grow: 1;
+    }
+    
+    .course-details div {
+        margin-bottom: 4px;
+        line-height: 1.3;
+    }
+    
+    .continued-badge {
+        align-self: flex-end;
+        font-size: 0.7rem;
+        background-color: #6c757d;
+        color: white;
+        padding: 2px 5px;
+        border-radius: 3px;
+        margin-top: 5px;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 1200px) {
+        .hour-column {
+            width: 130px;
+            min-width: 130px;
+        }
+    }
+    
+    @media (max-width: 992px) {
+        .hour-column {
+            width: 110px;
+            min-width: 110px;
+        }
+    }
+</style>
+
+{% endblock %}

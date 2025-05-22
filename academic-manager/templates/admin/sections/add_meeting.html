@@ -1,0 +1,103 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3>Add New Meeting</h3>
+        <p class="mb-0">For {{ section.course_title }} - Section {{ section.section_number }}</p>
+        {% if section.instructor_name %}
+        <p class="mb-0">Instructor: {{ section.instructor_name }}</p>
+        {% endif %}
+    </div>
+    
+    <div class="card-body">
+        <form method="post" id="meeting-form">
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label class="form-label">Day*</label>
+                    <select name="day" class="form-select {% if conflict_error %}is-invalid{% endif %}" required>
+                        <option value="">Select Day</option>
+                        <option value="monday" {% if day == 'monday' %}selected{% endif %}>Monday</option>
+                        <option value="tuesday" {% if day == 'tuesday' %}selected{% endif %}>Tuesday</option>
+                        <option value="wednesday" {% if day == 'wednesday' %}selected{% endif %}>Wednesday</option>
+                        <option value="thursday" {% if day == 'thursday' %}selected{% endif %}>Thursday</option>
+                        <option value="friday" {% if day == 'friday' %}selected{% endif %}>Friday</option>
+                        <option value="saturday" {% if day == 'saturday' %}selected{% endif %}>Saturday</option>
+                        <option value="sunday" {% if day == 'sunday' %}selected{% endif %}>Sunday</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Start Time*</label>
+                    <select name="time_start" class="form-select {% if conflict_error %}is-invalid{% endif %}" required>
+                        <option value="">Select Time</option>
+                        {% for hour in range(8, 21) %}
+                            <option value="{{ '%02d:00' % hour }}" 
+                                {% if time_start == '%02d:00'|format(hour) %}selected{% endif %}>
+                                {{ hour|timeformat }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">End Time*</label>
+                    <select name="time_end" class="form-select {% if conflict_error %}is-invalid{% endif %}" required>
+                        <option value="">Select Time</option>
+                        {% for hour in range(8, 21) %}
+                            <option value="{{ '%02d:00' % hour }}" 
+                                {% if time_end == '%02d:00'|format(hour) %}selected{% endif %}>
+                                {{ hour|timeformat }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-end">
+                <a href="{{ url_for('list_meetings', section_id=section.section_id) }}" 
+                   class="btn btn-secondary me-2">
+                   Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Save Meeting
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('meeting-form');
+    const startSelect = form.querySelector('select[name="time_start"]');
+    const endSelect = form.querySelector('select[name="time_end"]');
+    
+    function validateTimes() {
+        if (startSelect.value && endSelect.value && startSelect.value >= endSelect.value) {
+            endSelect.setCustomValidity('End time must be after start time');
+            endSelect.classList.add('is-invalid');
+        } else {
+            endSelect.setCustomValidity('');
+            endSelect.classList.remove('is-invalid');
+        }
+    }
+    
+    startSelect.addEventListener('change', function() {
+        validateTimes();
+        // Auto-set end time to next hour if not set
+        if (startSelect.value && !endSelect.value) {
+            const nextHour = parseInt(startSelect.value.split(':')[0]) + 1;
+            endSelect.value = nextHour.toString().padStart(2, '0') + ':00';
+        }
+    });
+    
+    endSelect.addEventListener('change', validateTimes);
+    
+    // Initial validation if there was a conflict error
+    {% if conflict_error %}
+    validateTimes();
+    {% endif %}
+});
+</script>
+{% endblock %}

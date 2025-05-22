@@ -1,0 +1,74 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if record %}Edit Financial Record{% else %}Create Financial Record{% endif %}{% endblock %}
+{% block header %}{% if record %}Edit Financial Record{% else %}Create New Financial Record{% endif %}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <form method="post">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="student_id" class="form-label">Student</label>
+                    <select class="form-select" id="student_id" name="student_id" required>
+                        <option value="">Select Student</option>
+                        {% for student in students %}
+                            <option value="{{ student.student_id }}" {% if record and record.student_id == student.student_id %}selected{% endif %}>
+                                {{ student.last_name }}, {{ student.first_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="semester_id" class="form-label">Semester</label>
+                    <select class="form-select" id="semester_id" name="semester_id" required>
+                        <option value="">Select Semester</option>
+                        {% for sem in semesters %}
+                            <option value="{{ sem.semester_id }}" {% if record and record.semester_id == sem.semester_id %}selected{% endif %}>
+                                {{ sem.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="amount" class="form-label">Amount</label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input type="number" class="form-control" id="amount" name="amount" 
+                               value="{{ record.amount if record else '' }}" step="0.01" min="0" required>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label for="due_date" class="form-label">Due Date</label>
+                    <input type="date" class="form-control" id="due_date" name="due_date" 
+                           value="{{ record.due_date.strftime('%Y-%m-%d') if record and record.due_date else '' }}" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-select" id="status" name="status" required>
+                        <option value="pending" {% if record and record.status == 'pending' %}selected{% endif %}>Pending</option>
+                        <option value="paid" {% if record and record.status == 'paid' %}selected{% endif %}>Paid</option>
+                        <option value="overdue" {% if record and record.status == 'overdue' %}selected{% endif %}>Overdue</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="payment_method" class="form-label">Payment Method</label>
+                    <input type="text" class="form-control" id="payment_method" name="payment_method" 
+                           value="{{ record.payment_method if record else '' }}">
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('admin_finances') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

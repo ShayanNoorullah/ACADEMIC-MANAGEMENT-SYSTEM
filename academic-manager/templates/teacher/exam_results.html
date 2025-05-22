@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block title %}Exam Results{% endblock %}
+
+{% block header %}Exam Results{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="POST">
+            <div class="row g-3">
+                <div class="col-md-5">
+                    <label class="form-label">Course</label>
+                    <select name="course" class="form-select" required>
+                        <option value="">-- Select Course --</option>
+                        {% for assignment in assignments|unique(attribute='course_id') %}
+                        <option value="{{ assignment.course_id }}" {% if selected_course == assignment.course_id|string %}selected{% endif %}>
+                            {{ assignment.title }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label">Section</label>
+                    <select name="section" class="form-select" required>
+                        <option value="">-- Select Section --</option>
+                        {% if selected_course %}
+                            {% for assignment in assignments %}
+                                {% if assignment.course_id|string == selected_course %}
+                                <option value="{{ assignment.section_number }}" {% if selected_section == assignment.section_number|string %}selected{% endif %}>
+                                    Section {{ assignment.section_number }}
+                                </option>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search me-1"></i> View
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if students_results %}
+<div class="card">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">Exam Results</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Student</th>
+                        <th>Final Grade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students_results %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ student.first_name }} {{ student.last_name }}</td>
+                        <td class="fw-semibold">
+                            {% if student.final_result is not none %}
+                                {{ student.final_result }}%
+                            {% else %}
+                                <span class="text-muted">Not available</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% elif selected_course and selected_section %}
+<div class="alert alert-info mt-4">
+    <i class="bi bi-info-circle me-2"></i> No results found for this section
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Transcript{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Academic Transcript</h2>
+        {% if semesters %}
+        <div class="col-md-3">
+            <select class="form-select" onchange="window.location.href='{{ url_for('student_transcript') }}?semester='+this.value">
+                <option value="">All Semesters</option>
+                {% for semester in semesters %}
+                <option value="{{ semester.semester_id }}" 
+                        {% if selected_semester is not none and selected_semester == semester.semester_id %}selected{% endif %}>
+                    {{ semester.semester_name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if selected_semester and semester_grades %}
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Semester Record</h4>
+            {% if semester_gpa %}
+            <span class="badge bg-primary">GPA: {{ semester_gpa }}</span>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Course Code</th>
+                            <th>Title</th>
+                            <th>Credits</th>
+                            <th>Grade</th>
+                            <th>Points</th>
+                            <th>Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for grade in semester_grades %}
+                        <tr>
+                            <td>{{ grade.code }}</td>
+                            <td>{{ grade.title }}</td>
+                            <td>{{ grade.credits }}</td>
+                            <td>{{ grade.grade }}</td>
+                            <td>{{ grade.points }}</td>
+                            <td>{{ grade.type|capitalize }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Complete Academic Record</h4>
+                {% if overall_gpa %}
+                <span class="badge bg-success">Overall GPA: {{ overall_gpa }}</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="card-body">
+            {% if transcript_records %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Semester</th>
+                            <th>Course</th>
+                            <th>Credits</th>
+                            <th>Grade</th>
+                            <th>Points</th>
+                            <th>Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in transcript_records %}
+                        <tr>
+                            <td>{{ record.semester_name }}</td>
+                            <td>{{ record.title }}</td>
+                            <td>{{ record.credits }}</td>
+                            <td>{{ record.grade }}</td>
+                            <td>{{ record.points }}</td>
+                            <td>{{ record.type|capitalize }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info">No transcript records available.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

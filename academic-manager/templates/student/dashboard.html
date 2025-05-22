@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Dashboard Header -->
+<div class="d-flex justify-content-between mb-4">
+    <h2>Dashboard</h2>
+    <div class="text-muted">
+        {% if current_semester %}
+            Semester: {{ current_semester.name }}
+        {% else %}
+            No active semester
+        {% endif %}
+    </div>
+</div>
+
+<!-- Top Row Cards -->
+<div class="row">
+    <!-- Current Courses Card -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">Current Courses</h5>
+            </div>
+            <div class="card-body">
+                {% if current_courses %}
+                    <div class="list-group">
+                        {% for course in current_courses %}
+                        <a href="{{ url_for('course_details', section_id=course.section_id) }}" 
+                           class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ course.title }}</h6>
+                                <small>{{ course.credits }} Credits</small>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">Section {{ course.section_number }}</small>
+                                <small class="text-muted">{{ course.instructor_name }}</small>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No courses enrolled this semester</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Upcoming Assignments Card -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="card-title mb-0">Upcoming Assignments</h5>
+            </div>
+            <div class="card-body">
+                {% if upcoming_assignments %}
+                    <div class="list-group">
+                        {% for assignment in upcoming_assignments %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ assignment.title }}</h6>
+                                <small>{{ assignment.due_date.strftime('%b %d') }}</small>
+                            </div>
+                            <p class="mb-1">{{ assignment.course_title }}</p>
+                            <small class="text-muted">Section {{ assignment.section_number }}</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No upcoming assignments</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bottom Row Cards -->
+<div class="row">
+    <!-- Recent Announcements Card -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0">Recent Announcements</h5>
+                <a href="{{ url_for('student_announcements') }}" class="float-end text-white small">View All</a>
+            </div>
+            <div class="card-body">
+                {% if recent_announcements %}
+                    <div class="list-group">
+                        {% for announcement in recent_announcements %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ announcement.title }}</h6>
+                                <small>{{ announcement.created_at.strftime('%b %d') }}</small>
+                            </div>
+                            <p class="mb-1 text-truncate">{{ announcement.message }}</p>
+                            <small class="text-muted">
+                                {{ announcement.course_title }} - Section {{ announcement.section_number }}
+                            </small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted">No recent announcements</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Links Card -->
+    <!-- Quick Links Card -->
+<div class="col-md-6 mb-4">
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Quick Links</h5>
+        </div>
+        <div class="card-body">
+            <div class="d-grid gap-2">
+                <a href="{{ url_for('student_courses') }}" class="btn btn-outline-primary text-start">
+                    <i class="bi bi-book me-2"></i> My Courses
+                </a>
+                <a href="{{ url_for('student_announcements') }}" class="btn btn-outline-success text-start">
+                    <i class="bi bi-megaphone me-2"></i> Announcements
+                </a>
+                <a href="{{ url_for('student_transcript') }}" class="btn btn-outline-info text-start">
+                    <i class="bi bi-journal-check me-2"></i> Transcripts
+                </a>
+                <a href="{{ url_for('student_finances') }}" class="btn btn-outline-secondary text-start">
+                    <i class="bi bi-cash-stack me-2"></i> Finances
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+{% endblock %}

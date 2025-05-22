@@ -1,0 +1,74 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if course %}Edit Course{% else %}Create Course{% endif %}{% endblock %}
+{% block header %}{% if course %}Edit Course{% else %}Create New Course{% endif %}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="title" class="form-label">Course Title</label>
+                <input type="text" class="form-control" id="title" name="title" 
+                       value="{{ course.title if course else '' }}" required>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="credits" class="form-label">Credits</label>
+                    <input type="number" class="form-control" id="credits" name="credits" 
+                           value="{{ course.credits if course else '' }}" min="1" max="10" required>
+                </div>
+                <div class="col-md-6">
+                    <label for="department_id" class="form-label">Department</label>
+                    <select class="form-select" id="department_id" name="department_id">
+                        <option value="">-- No Department --</option>
+                        {% for dept in departments %}
+                            <option value="{{ dept.department_id }}" {% if course and course.department_id == dept.department_id %}selected{% endif %}>
+                                {{ dept.name }} ({{ dept.code }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="syllabus_url" class="form-label">Syllabus URL</label>
+                <input type="url" class="form-control" id="syllabus_url" name="syllabus_url" 
+                       value="{{ course.syllabus if course and not course.syllabus.startswith('/static/uploads/') else '' }}" 
+                       placeholder="https://example.com/syllabus.pdf">
+                <small class="text-muted">Leave empty if uploading a file</small>
+            </div>
+            
+            <div class="mb-3">
+                <label for="syllabus_file" class="form-label">Or Upload Syllabus File</label>
+                <input type="file" class="form-control" id="syllabus_file" name="syllabus_file">
+                {% if course and course.syllabus and course.syllabus.startswith('/static/uploads/') %}
+                    <small class="text-muted">Current file: <a href="{{ course.syllabus }}" target="_blank">View</a></small>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                <label for="content_url" class="form-label">Course Content URL</label>
+                <input type="url" class="form-control" id="content_url" name="content_url" 
+                       value="{{ course.content_file_path if course and not course.content_file_path.startswith('/static/uploads/') else '' }}" 
+                       placeholder="https://example.com/course-content.pdf">
+                <small class="text-muted">Leave empty if uploading a file</small>
+            </div>
+            
+            <div class="mb-3">
+                <label for="content_file" class="form-label">Or Upload Course Content File</label>
+                <input type="file" class="form-control" id="content_file" name="content_file">
+                {% if course and course.content_file_path and course.content_file_path.startswith('/static/uploads/') %}
+                    <small class="text-muted">Current file: <a href="{{ course.content_file_path }}" target="_blank">View</a></small>
+                {% endif %}
+            </div>
+            
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('admin_courses') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "teacher/base.html" %}
+{% block title %}Assigned Courses{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h3 class="mb-4"><i class="bi bi-journal-bookmark me-2"></i>Assigned Courses</h3>
+
+    {% if assigned_courses %}
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col"><i class="bi bi-book"></i> Course Title</th>
+                    
+                    <th scope="col"><i class="bi bi-123"></i> Section ID</th>
+                    <th scope="col"><i class="bi bi-calendar3"></i> Semester</th>
+                    <th scope="col"><i class="bi bi-calendar-day"></i> Day</th>
+                    <th scope="col"><i class="bi bi-clock"></i> Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for course in assigned_courses %}
+                <tr>
+                    <td>{{ course.course_title }}</td>
+                    <td>{{ course.section_number }}</td>
+                    <td>{{ course.semester_name }}</td>
+                    <td class="text-capitalize">{{ course.day }}</td>
+                    <td>{{ course.time_start }} - {{ course.time_end }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            <i class="bi bi-info-circle me-2"></i>No assigned courses found.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

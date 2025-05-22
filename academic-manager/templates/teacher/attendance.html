@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Attendance{% endblock %}
+
+{% block header %}Attendance Management{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="POST">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label"><i class="bi bi-journal-text me-1"></i> Course</label>
+                    <select name="course" class="form-select" required>
+                        <option value="" disabled selected>Select course</option>
+                        {% for a in assignments %}
+                            <option value="{{ a.course_id }}" {% if a.course_id|string == request.form.course %}selected{% endif %}>
+                                {{ a.title }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label"><i class="bi bi-people me-1"></i> Section</label>
+                    <select name="section" class="form-select" required>
+                        <option value="" disabled selected>Select section</option>
+                        {% for a in assignments %}
+                            <option value="{{ a.section_number }}" {% if a.section_number|string == request.form.section %}selected{% endif %}>
+                                Section {{ a.section_number }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label"><i class="bi bi-calendar me-1"></i> Date</label>
+                    <input type="date" name="date" class="form-control" value="{{ request.form.date }}" required>
+                </div>
+                <div class="col-12">
+                    {% if students %}
+                    <button type="submit" name="submit_attendance" class="btn btn-success">
+                        <i class="bi bi-cloud-upload me-1"></i> Submit Attendance
+                    </button>
+                    {% else %}
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search me-1"></i> Load Students
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if students %}
+<div class="card">
+    <div class="card-header bg-white">
+        <h5 class="mb-0">Student Attendance</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Student ID</th>
+                        <th>Name</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td>{{ student.student_id }}</td>
+                        <td>{{ student.first_name }} {{ student.last_name }}</td>
+                        <td>
+                            <select name="status_{{ student.student_id }}" class="form-select" required>
+                                {% set current_status = attendance_map.get(student.student_id, '') %}
+                                <option value="present" {% if current_status == 'present' %}selected{% endif %}>Present</option>
+                                <option value="absent" {% if current_status == 'absent' %}selected{% endif %}>Absent</option>
+                                <option value="late" {% if current_status == 'late' %}selected{% endif %}>Late</option>
+                                <option value="excused" {% if current_status == 'excused' %}selected{% endif %}>Excused</option>
+                            </select>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% elif request.method == 'POST' %}
+<div class="alert alert-warning mt-4">
+    <i class="bi bi-exclamation-triangle me-2"></i> No students found for the selected course and section
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "teacher/base.html" %}
+{% block title %}Edit Assignment{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h3>Edit Assignment</h3>
+
+    <form method="POST" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label for="title" class="form-label">Title</label>
+            <input type="text" class="form-control" id="title" name="title" value="{{ assignment.title }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control" id="description" name="description" required>{{ assignment.description }}</textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="due_date" class="form-label">Due Date</label>
+            <input type="datetime-local" class="form-control" id="due_date" name="due_date" value="{{ assignment.due_date|replace(' ', 'T') }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="max_points" class="form-label">Max Points</label>
+            <input type="number" class="form-control" id="max_points" name="max_points" value="{{ assignment.max_points }}" step="0.01" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="file" class="form-label">Upload File (Optional)</label>
+            <input type="file" class="form-control" id="file" name="file">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Update Assignment</button>
+    </form>
+</div>
+{% endblock %}

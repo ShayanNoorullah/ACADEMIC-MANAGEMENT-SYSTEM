@@ -1,0 +1,174 @@
+{% extends "teacher/base.html" %}
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Teacher Profile</h2>
+    </div>
+
+    <div class="row">
+        <!-- Profile Picture Column -->
+        <div class="col-lg-4">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body text-center">
+                    <!-- Profile Picture Display -->
+                    <div class="position-relative mb-3 mx-auto" style="width: 180px; height: 180px;">
+                        {% if user.profile_pic %}
+                            <img src="{{ url_for('static', filename='profile_pics/' + user.profile_pic) }}" 
+                                class="rounded-circle w-100 h-100 object-fit-cover border border-3 border-primary">
+                        {% else %}
+                            <div class="rounded-circle w-100 h-100 bg-light d-flex align-items-center justify-content-center border border-3 border-primary">
+                                <i class="bi bi-person-fill text-secondary" style="font-size: 5rem;"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Upload Button Trigger -->
+                        <button class="btn btn-sm btn-primary position-absolute bottom-0 end-0 rounded-circle" 
+                                style="width: 40px; height: 40px;"
+                                data-bs-toggle="modal" data-bs-target="#uploadPhotoModal">
+                            <i class="bi bi-camera-fill"></i>
+                        </button>
+                    </div>
+
+                    <h3 class="mb-1">{{ user.first_name }} {{ user.last_name }}</h3>
+                    <p class="text-muted mb-2">{{ user.email }}</p>
+                    <span class="badge bg-info text-dark">{{ user.teaching_program|capitalize if user.teaching_program else 'Teacher' }}</span>
+                </div>
+            </div>
+
+            <!-- Quick Stats Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Professional Summary</h5>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Teacher ID:</span>
+                        <strong>{{ user.teacher_id }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Teaching Program:</span>
+                        <strong>{{ user.teaching_program or 'Not specified' }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Enrolled Since:</span>
+                        <strong>{{ user.enrollment_date.strftime('%b %Y') if user.enrollment_date else 'Not specified' }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Details Column -->
+        <div class="col-lg-8">
+            <!-- Personal Information Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Personal Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <h6 class="text-muted">Date of Birth</h6>
+                            <p>{{ user.birth_date.strftime('%B %d, %Y') if user.birth_date else 'Not specified' }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h6 class="text-muted">Gender</h6>
+                            <p>{{ user.gender|capitalize if user.gender else 'Not specified' }}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <h6 class="text-muted">Salary</h6>
+                            <p>
+                                {% if user.salary %}
+                                    ${{ "{:,.2f}".format(user.salary) }}
+                                {% else %}
+                                    Not specified
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Contact Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <h6 class="text-muted">Phone</h6>
+                            <p>{{ user.phone if user.phone else 'Not specified' }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <h6 class="text-muted">Email</h6>
+                            <p>{{ user.email }}</p>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-muted">Address</h6>
+                        <p>{{ user.address if user.address else 'Not specified' }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upload Photo Modal -->
+<div class="modal fade" id="uploadPhotoModal" tabindex="-1" aria-labelledby="uploadPhotoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadPhotoModalLabel">Update Profile Picture</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ url_for('upload_teacher_profile_pic') }}" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="profilePicInput" class="form-label">Choose an image</label>
+                        <input class="form-control" type="file" id="profilePicInput" name="profile_pic" accept="image/*" required>
+                        <div class="form-text">Allowed formats: JPG, PNG, GIF. Max size: 2MB</div>
+                    </div>
+                    <div class="text-center">
+                        <img id="imagePreview" src="#" alt="Preview" class="img-thumbnail d-none" style="max-height: 200px;">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Upload</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Image preview functionality
+    document.getElementById('profilePicInput').addEventListener('change', function(event) {
+        const [file] = event.target.files;
+        if (file) {
+            const preview = document.getElementById('imagePreview');
+            preview.src = URL.createObjectURL(file);
+            preview.classList.remove('d-none');
+            
+            // Validate file size (2MB max)
+            if (file.size > 2 * 1024 * 1024) {
+                alert('File size exceeds 2MB limit');
+                event.target.value = '';
+                preview.classList.add('d-none');
+            }
+            
+            // Validate file type
+            const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+            if (!validTypes.includes(file.type)) {
+                alert('Only JPG, PNG, and GIF files are allowed');
+                event.target.value = '';
+                preview.classList.add('d-none');
+            }
+        }
+    });
+</script>
+
+{% endblock %}

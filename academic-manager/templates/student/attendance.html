@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>My Attendance</h2>
+    
+    {% if not current_semester %}
+        <div class="alert alert-info">No current semester found.</div>
+    {% else %}
+        <p>Showing attendance for <strong>{{ current_semester.name }}</strong></p>
+        
+        {% for key, data in attendance_data.items() %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4>{{ data.title }} - Section {{ data.section_number }}</h4>
+                    <span class="badge bg-secondary">Instructor: {{ data.instructor_name }}</span>
+                </div>
+                
+                {% set stats = data.stats %}
+                <div class="progress mt-2" style="height: 25px;">
+                    <div class="progress-bar {% if stats.attendance_percentage >= 75 %}bg-success{% elif stats.attendance_percentage >= 50 %}bg-warning{% else %}bg-danger{% endif %}" 
+                        role="progressbar" 
+                        style="width: {{ stats.attendance_percentage }}%; font-weight: bold;" 
+                        aria-valuenow="{{ stats.attendance_percentage }}" 
+                        aria-valuemin="0" 
+                        aria-valuemax="100">
+                    {{ stats.attendance_percentage }}%
+                    </div>
+                </div>
+                <small class="text-muted">Present: {{ stats.present_classes }} of {{ stats.total_classes }} classes</small>
+            </div>
+            
+            <div class="card-body">
+                {% if data.records %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Duration</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in data.records %}
+                            <tr>
+                                <td>{{ record.date.strftime('%b %d, %Y') }}</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if record.status == 'present' %}bg-success
+                                        {% elif record.status == 'absent' %}bg-danger
+                                        {% elif record.status == 'late' %}bg-warning text-dark
+                                        {% else %}bg-info{% endif %}">
+                                        {{ record.status|capitalize }}
+                                    </span>
+                                </td>
+                                <td>{{ record.duration }} hours</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">No attendance records available for this course.</div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}

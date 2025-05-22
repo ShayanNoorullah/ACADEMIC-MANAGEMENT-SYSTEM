@@ -1,0 +1,48 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Create Loan{% endblock %}
+{% block header %}Create New Loan{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <form method="post">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="book_id" class="form-label">Book</label>
+                    <select class="form-select" id="book_id" name="book_id" required>
+                        <option value="">Select Book</option>
+                        {% for book in available_books %}
+                            <option value="{{ book.book_id }}">
+                                {{ book.title }} by {{ book.author }} ({{ book.available_copies }} available)
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="student_id" class="form-label">Student</label>
+                    <select class="form-select" id="student_id" name="student_id" required>
+                        <option value="">Select Student</option>
+                        {% for student in students %}
+                            <option value="{{ student.student_id }}">
+                                {{ student.last_name }}, {{ student.first_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="due_date" class="form-label">Due Date</label>
+                <input type="date" class="form-control" id="due_date" name="due_date" 
+                       value="{{ default_due_date }}" required>
+            </div>
+            
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('admin_library_loans') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Create Loan</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

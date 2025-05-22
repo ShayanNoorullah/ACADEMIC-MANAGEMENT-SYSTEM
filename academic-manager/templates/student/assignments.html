@@ -1,0 +1,394 @@
+{% extends "base.html" %}
+{% block title %}Assignments{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between mb-4">
+    <h2>My Assignments</h2>
+    <div>
+        <select class="form-select" id="courseFilter" onchange="filterAssignments(this.value)">
+            <option value="all">All Courses</option>
+            {% for course in courses %}
+                <option value="{{ course.course_id }}">{{ course.code }} - {{ course.title }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <ul class="nav nav-tabs card-header-tabs">
+            <li class="nav-item">
+                <a class="nav-link active" href="#pending" data-bs-toggle="tab">Pending</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#submitted" data-bs-toggle="tab">Submitted</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#graded" data-bs-toggle="tab">Graded</a>
+            </li>
+        </ul>
+    </div>
+    <div class="card-body">
+        <div class="tab-content">
+            <!-- Pending Assignments -->
+            <div class="tab-pane fade show active" id="pending">
+                {% if pending_assignments %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Course</th>
+                                    <th>Title</th>
+                                    <th>Due Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for assignment in pending_assignments %}
+                                    <tr data-course-id="{{ assignment.course_id }}">
+                                        <td>
+                                            <a href="{{ url_for('course_details', section_id=assignment.section_id) }}">
+                                                {{ assignment.course_code }}
+                                            </a>
+                                        </td>
+                                        <td>{{ assignment.title }}</td>
+                                        <td>
+                                            {{ assignment.due_date.strftime('%b %d, %Y %I:%M %p') }}
+                                            {% if assignment.due_date < current_date %}
+                                                <span class="badge bg-danger ms-2">Overdue</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary submit-assignment" 
+                                                    data-assignment-id="{{ assignment.assignment_id }}"
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#assignmentModal">
+                                                Submit
+                                            </button>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">No pending assignments.</div>
+                {% endif %}
+            </div>
+
+            <!-- Submitted Assignments -->
+            <div class="tab-pane fade" id="submitted">
+                {% if submitted_assignments %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Course</th>
+                                    <th>Title</th>
+                                    <th>Submitted On</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for assignment in submitted_assignments %}
+                                    <tr data-course-id="{{ assignment.course_id }}">
+                                        <td>
+                                            <a href="{{ url_for('course_details', section_id=assignment.section_id) }}">
+                                                {{ assignment.course_code }}
+                                            </a>
+                                        </td>
+                                        <td>{{ assignment.title }}</td>
+                                        <td>{{ assignment.submit_date.strftime('%b %d, %Y %I:%M %p') }}</td>
+                                        <td>
+                                            <span class="badge bg-info">Submitted</span>
+                                        </td>
+                                        <td>
+                                            {% if assignment.file_path %}
+                                                <a href="{{ assignment.file_path }}" class="btn btn-sm btn-outline-primary" download>
+                                                    <i class="bi bi-download"></i> Download
+                                                </a>
+                                            {% endif %}
+                                            <button class="btn btn-sm btn-outline-secondary view-feedback"
+                                                    data-feedback="{{ assignment.feedback|default('No feedback provided yet.', true) }}"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#feedbackModal">
+                                                View Feedback
+                                            </button>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">No submitted assignments.</div>
+                {% endif %}
+            </div>
+
+            <!-- Graded Assignments -->
+            <div class="tab-pane fade" id="graded">
+                {% if graded_assignments %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Course</th>
+                                    <th>Title</th>
+                                    <th>Grade</th>
+                                    <th>Submitted On</th>
+                                    <th>Feedback</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for assignment in graded_assignments %}
+                                    <tr data-course-id="{{ assignment.course_id }}">
+                                        <td>
+                                            <a href="{{ url_for('course_details', section_id=assignment.section_id) }}">
+                                                {{ assignment.course_code }}
+                                            </a>
+                                        </td>
+                                        <td>{{ assignment.title }}</td>
+                                        <td>
+                                            <span class="badge bg-{% if assignment.grade/assignment.max_points >= 0.8 %}success
+                                                                  {% elif assignment.grade/assignment.max_points >= 0.5 %}warning text-dark
+                                                                  {% else %}danger{% endif %}">
+                                                {{ assignment.grade }}/{{ assignment.max_points }}
+                                            </span>
+                                        </td>
+                                        <td>{{ assignment.submit_date.strftime('%b %d, %Y') }}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary view-feedback"
+                                                    data-feedback="{{ assignment.feedback|default('No feedback provided.', true) }}"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#feedbackModal">
+                                                View
+                                            </button>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">No graded assignments yet.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Assignment Submission Modal -->
+<div class="modal fade" id="assignmentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Submit Assignment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="assignmentForm" method="POST" enctype="multipart/form-data" action="{{ url_for('submit_assignment') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="assignmentFile" class="form-label">Upload File</label>
+                        <input class="form-control" type="file" id="assignmentFile" name="file" required>
+                        <div class="form-text">Accepted formats: PDF, DOCX, PPTX, ZIP (Max 10MB)</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="assignmentComments" class="form-label">Comments</label>
+                        <textarea class="form-control" id="assignmentComments" name="comments" rows="3"></textarea>
+                    </div>
+                    <input type="hidden" id="assignmentId" name="assignment_id">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="submitAssignmentBtn">Submit Assignment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Feedback Modal -->
+<div class="modal fade" id="feedbackModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Instructor Feedback</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="feedbackContent">
+                <!-- Content will be inserted here by JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Filter assignments by course
+function filterAssignments(courseId) {
+    const rows = document.querySelectorAll('tbody tr');
+    rows.forEach(row => {
+        if (courseId === 'all' || row.getAttribute('data-course-id') === courseId) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Bootstrap tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Set up assignment submission modal
+    const assignmentModal = document.getElementById('assignmentModal');
+    if (assignmentModal) {
+        assignmentModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const assignmentId = button.getAttribute('data-assignment-id');
+            document.getElementById('assignmentId').value = assignmentId;
+        });
+    }
+
+    // Set up feedback modal
+    const feedbackModal = document.getElementById('feedbackModal');
+    if (feedbackModal) {
+        feedbackModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const feedback = button.getAttribute('data-feedback');
+            document.getElementById('feedbackContent').innerHTML = 
+                `<div class="feedback-content p-3 bg-light rounded">
+                    ${feedback}
+                </div>`;
+        });
+    }
+
+    // Handle form submission with AJAX
+    const assignmentForm = document.getElementById('assignmentForm');
+    if (assignmentForm) {
+        assignmentForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitAssignmentBtn');
+            const formData = new FormData(this);
+            
+            // Disable button and show loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                Submitting...
+            `;
+            
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Close modal and refresh page
+                    const modal = bootstrap.Modal.getInstance(assignmentModal);
+                    modal.hide();
+                    // Show success message
+                    showAlert('Assignment submitted successfully!', 'success');
+                    // Refresh the page after 1 second
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    throw new Error(data.message || 'Error submitting assignment');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert(error.message || 'An error occurred while submitting', 'danger');
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Assignment';
+            });
+        });
+    }
+
+    // Helper function to show alerts
+    function showAlert(message, type) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        
+        const container = document.querySelector('.main-content');
+        if (container) {
+            container.insertBefore(alertDiv, container.firstChild);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                const bsAlert = new bootstrap.Alert(alertDiv);
+                bsAlert.close();
+            }, 5000);
+        }
+    }
+});
+</script>
+
+<style>
+/* Custom styles for assignments page */
+.feedback-content {
+    white-space: pre-wrap;
+    font-family: inherit;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+.nav-tabs .nav-link {
+    color: #495057;
+    font-weight: 500;
+}
+
+.nav-tabs .nav-link.active {
+    font-weight: 600;
+}
+
+#courseFilter {
+    max-width: 300px;
+}
+
+/* Loading spinner for submit button */
+.btn-loading {
+    position: relative;
+}
+
+.btn-loading .spinner-border {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-left: -0.5rem;
+    margin-top: -0.5rem;
+    width: 1rem;
+    height: 1rem;
+}
+</style>
+{% endblock %}

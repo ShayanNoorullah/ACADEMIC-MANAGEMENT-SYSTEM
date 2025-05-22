@@ -1,0 +1,204 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3>Create Section</h3>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Course</label>
+                    <select name="course_id" class="form-select" required>
+                        <option value="">Select Course</option>
+                        {% for course in courses %}
+                        <option value="{{ course.course_id }}" 
+                            {% if section.course_id == course.course_id %}selected{% endif %}>
+                            {{ course.title }} ({{ course.code }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Semester</label>
+                    <select name="semester_id" class="form-select" required>
+                        <option value="">Select Semester</option>
+                        {% for semester in semesters %}
+                        <option value="{{ semester.semester_id }}" 
+                            {% if section.semester_id == semester.semester_id %}selected{% endif %}>
+                            {{ semester.name }} ({{ semester.year }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label class="form-label">Section Number</label>
+                    <input type="text" name="section_number" class="form-control" 
+                           value="{{ section.section_number }}" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Instructor</label>
+                    <select name="instructor_id" class="form-select">
+                        <option value="">Select Instructor</option>
+                        {% for instructor in instructors %}
+                        <option value="{{ instructor.id }}" 
+                            {% if section.instructor_id == instructor.id %}selected{% endif %}>
+                            {{ instructor.last_name }}, {{ instructor.first_name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Max Capacity</label>
+                    <input type="number" name="max_capacity" class="form-control" 
+                           value="{{ section.max_capacity }}" required min="1">
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-12">
+                    <h5>Meeting Times</h5>
+                    <div id="meeting-times-container">
+                        <div class="row mb-2 meeting-time-row">
+                            <div class="col-md-4">
+                                <select name="meetings[]" class="form-select" required>
+                                    <option value="">Select Day</option>
+                                    <option value="Monday">Monday</option>
+                                    <option value="Tuesday">Tuesday</option>
+                                    <option value="Wednesday">Wednesday</option>
+                                    <option value="Thursday">Thursday</option>
+                                    <option value="Friday">Friday</option>
+                                    <option value="Saturday">Saturday</option>
+                                    <option value="Sunday">Sunday</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <select name="meetings[]" class="form-select" required>
+                                    <option value="">Start Time</option>
+                                    {% for hour in range(8, 21) %}
+                                        <option value="{{ '%02d:00:00' % hour }}">
+                                            {% if hour == 12 %}
+                                                12:00 PM
+                                            {% elif hour > 12 %}
+                                                {{ hour - 12 }}:00 PM
+                                            {% else %}
+                                                {{ hour }}:00 AM
+                                            {% endif %}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <select name="meetings[]" class="form-select" required>
+                                    <option value="">End Time</option>
+                                    {% for hour in range(8, 21) %}
+                                        <option value="{{ '%02d:00:00' % hour }}">
+                                            {% if hour == 12 %}
+                                                12:00 PM
+                                            {% elif hour > 12 %}
+                                                {{ hour - 12 }}:00 PM
+                                            {% else %}
+                                                {{ hour }}:00 AM
+                                            {% endif %}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{{ url_for('admin_sections') }}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Sections
+                </a>
+                <div> 
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Save Section
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add meeting time row
+        document.getElementById('add-meeting-time').addEventListener('click', function() {
+            const container = document.getElementById('meeting-times-container');
+            const newRow = document.querySelector('.meeting-time-row').cloneNode(true);
+            
+            // Clear selections in new row
+            newRow.querySelectorAll('select').forEach(select => {
+                select.selectedIndex = 0;
+            });
+            
+            container.appendChild(newRow);
+        });
+    
+        // Real-time validation for time selection
+        document.addEventListener('change', function(e) {
+            if (e.target.classList.contains('start-time') {
+                const row = e.target.closest('.meeting-time-row');
+                const startSelect = row.querySelector('.start-time');
+                const endSelect = row.querySelector('.end-time');
+                
+                if (startSelect.value && endSelect.value) {
+                    validateTimeRange(row);
+                }
+            }
+        });
+    
+        // Form submission validation
+        document.getElementById('section-form').addEventListener('submit', function(e) {
+            let isValid = true;
+            const meetingRows = document.querySelectorAll('.meeting-time-row');
+            
+            // Check all meeting time rows
+            meetingRows.forEach(row => {
+                const daySelect = row.querySelector('.day-select');
+                const startSelect = row.querySelector('.start-time');
+                const endSelect = row.querySelector('.end-time');
+                
+                // Check all fields are filled
+                if (!daySelect.value || !startSelect.value || !endSelect.value) {
+                    alert('Please fill all meeting time fields');
+                    isValid = false;
+                    return;
+                }
+                
+                // Validate time range
+                if (!validateTimeRange(row)) {
+                    isValid = false;
+                    return;
+                }
+            });
+            
+            if (!isValid) {
+                e.preventDefault();
+            }
+        });
+    
+        function validateTimeRange(row) {
+            const startSelect = row.querySelector('.start-time');
+            const endSelect = row.querySelector('.end-time');
+            
+            const startHour = parseInt(startSelect.value.split(':')[0]);
+            const endHour = parseInt(endSelect.value.split(':')[0]);
+            
+            if (endHour <= startHour) {
+                const startDisplay = startSelect.options[startSelect.selectedIndex].text;
+                const endDisplay = endSelect.options[endSelect.selectedIndex].text;
+                
+                alert(`Invalid time range: ${endDisplay} must be after ${startDisplay}`);
+                endSelect.value = '';
+                return false;
+            }
+            return true;
+        }
+    });
+    </script>
+{% endblock %}

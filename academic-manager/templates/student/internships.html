@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Internships{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between mb-4">
+    <h2>Internship Opportunities</h2>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Available Internships</h5>
+    </div>
+    <div class="card-body">
+        {% if internships %}
+            <div class="row">
+                {% for internship in internships %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ internship.title }}</h5>
+                                <h6 class="card-subtitle mb-2 text-muted">{{ internship.company }}</h6>
+                                <p class="card-text">{{ internship.description[:150] }}...</p>
+                                <div class="mb-2">
+                                    <span class="badge bg-secondary me-1">{{ internship.location }}</span>
+                                    <span class="badge bg-info text-dark">
+                                        Deadline: {{ internship.application_deadline.strftime('%b %d, %Y') }}
+                                    </span>
+                                </div>
+                                <a href="{{ internship.link }}" class="btn btn-sm btn-primary" target="_blank">
+                                    Apply Now
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info">No internship opportunities available at this time.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

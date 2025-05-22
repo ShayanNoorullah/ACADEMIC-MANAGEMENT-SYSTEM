@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Course Announcements{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Course Announcements</h2>
+        <a href="{{ url_for('student_dashboard') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+        </a>
+    </div>
+
+    {% if announcements_by_course %}
+        <div class="accordion" id="announcementsAccordion">
+            {% for course, data in announcements_by_course.items() %}
+                <div class="accordion-item mb-3">
+                    <h2 class="accordion-header" id="heading{{ loop.index }}">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" 
+                                data-bs-target="#collapse{{ loop.index }}" aria-expanded="true" 
+                                aria-controls="collapse{{ loop.index }}">
+                            <div>
+                                <h5 class="mb-0">{{ course }}</h5>
+                                <small class="text-muted">Instructor: {{ data.instructor }}</small>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="collapse{{ loop.index }}" class="accordion-collapse collapse show" 
+                         aria-labelledby="heading{{ loop.index }}" data-bs-parent="#announcementsAccordion">
+                        <div class="accordion-body">
+                            {% for announcement in data.announcements %}
+                                <div class="card mb-3">
+                                    <div class="card-header bg-light">
+                                        <div class="d-flex justify-content-between">
+                                            <h5 class="mb-0">{{ announcement.title }}</h5>
+                                            <small class="text-muted">{{ announcement.created_at.strftime('%b %d, %Y %I:%M %p') }}</small>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="card-text">{{ announcement.message }}</p>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            <a href="{{ url_for('course_details', section_id=data.section_id) }}" 
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-journal-bookmark me-1"></i> View Course Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            No announcements found for your courses.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

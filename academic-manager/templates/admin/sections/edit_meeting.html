@@ -1,0 +1,95 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3>Edit Meeting</h3>
+    </div>
+    
+    <div class="card-body">
+        <form method="post">
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label class="form-label">Day*</label>
+                    <select name="day" class="form-select" required>
+                        <option value="">Select Day</option>
+                        <option value="monday" {% if meeting.day == 'monday' %}selected{% endif %}>Monday</option>
+                        <option value="tuesday" {% if meeting.day == 'tuesday' %}selected{% endif %}>Tuesday</option>
+                        <option value="wednesday" {% if meeting.day == 'wednesday' %}selected{% endif %}>Wednesday</option>
+                        <option value="thursday" {% if meeting.day == 'thursday' %}selected{% endif %}>Thursday</option>
+                        <option value="friday" {% if meeting.day == 'friday' %}selected{% endif %}>Friday</option>
+                        <option value="saturday" {% if meeting.day == 'saturday' %}selected{% endif %}>Saturday</option>
+                        <option value="sunday" {% if meeting.day == 'sunday' %}selected{% endif %}>Sunday</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Start Time*</label>
+                    <select name="time_start" class="form-select" required>
+                        <option value="">Select Start Time</option>
+                        {% for hour in range(8, 21) %}
+                            {% set time_value = "{:02d}:00".format(hour) %}
+                            <option value="{{ time_value }}" 
+                                {% if meeting.time_start == time_value %}selected{% endif %}>
+                                {{ hour|twelve_hour }}:00 {{ hour|am_pm }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">End Time*</label>
+                    <select name="time_end" class="form-select" required>
+                        <option value="">Select End Time</option>
+                        {% for hour in range(8, 21) %}
+                            {% set time_value = "{:02d}:00".format(hour) %}
+                            <option value="{{ time_value }}" 
+                                {% if meeting.time_end == time_value %}selected{% endif %}>
+                                {{ hour|twelve_hour }}:00 {{ hour|am_pm }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-end">
+                <a href="{{ url_for('list_meetings', section_id=meeting.section_id) }}" 
+                   class="btn btn-secondary me-2">
+                   Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Update Meeting
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Time validation
+    const startSelect = document.querySelector('select[name="time_start"]');
+    const endSelect = document.querySelector('select[name="time_end"]');
+    
+    function validateTimes() {
+        if (startSelect.value && endSelect.value && startSelect.value >= endSelect.value) {
+            endSelect.setCustomValidity('End time must be after start time');
+            endSelect.classList.add('is-invalid');
+        } else {
+            endSelect.setCustomValidity('');
+            endSelect.classList.remove('is-invalid');
+        }
+    }
+    
+    startSelect.addEventListener('change', validateTimes);
+    endSelect.addEventListener('change', validateTimes);
+    
+    // Highlight conflicting fields if error exists
+    {% if conflict_error %}
+    document.querySelector('select[name="day"]').classList.add('is-invalid');
+    document.querySelector('select[name="time_start"]').classList.add('is-invalid');
+    document.querySelector('select[name="time_end"]').classList.add('is-invalid');
+    {% endif %}
+});
+</script>
+{% endblock %}
+{% endblock %}

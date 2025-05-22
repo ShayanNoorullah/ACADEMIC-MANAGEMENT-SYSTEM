@@ -1,0 +1,73 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Semester Management{% endblock %}
+{% block header %}Semester Management{% endblock %}
+
+{% block actions %}
+    <a href="{{ url_for('create_semester') }}" class="btn btn-sm btn-outline-primary">
+        <i class="bi bi-plus-lg"></i> Add Semester
+    </a>
+{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-10">
+                <input type="text" name="search" class="form-control" placeholder="Search by semester name" value="{{ search }}">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Search</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Dates</th>
+                <th>Max Credits</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for semester in semesters %}
+            <tr>
+                <td>{{ semester.name }}</td>
+                <td>{{ semester.start_date.strftime('%b %d, %Y') }} - {{ semester.end_date.strftime('%b %d, %Y') }}</td>
+                <td>{{ semester.max_credits }}</td>
+                <td>
+                    {% if semester.is_current %}
+                        <span class="badge bg-success">Current</span>
+                    {% else %}
+                        <form method="post" action="{{ url_for('set_current_semester', semester_id=semester.semester_id) }}" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                Set Current
+                            </button>
+                        </form>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('edit_semester', semester_id=semester.semester_id) }}" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <form method="post" action="{{ url_for('delete_semester', semester_id=semester.semester_id) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this semester?');">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" class="text-center">No semesters found</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,193 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Admin Dashboard</h1>
+    <div class="system-status-badges">
+        <span class="badge bg-primary me-1" title="Current Semester">
+            <i class="bi bi-calendar3"></i> {{ current_semester.name if current_semester else 'Not set' }}
+        </span>
+    </div>
+</div>
+
+<!-- Quick Stats Row -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title">Total Students</h6>
+                        <p class="card-text h4">{{ stats.students_count }}</p>
+                    </div>
+                    <i class="bi bi-people fs-1"></i>
+                </div>
+                <a href="{{ url_for('admin_users') }}?role=student" class="stretched-link text-white text-decoration-none"></a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title">Active Courses</h6>
+                        <p class="card-text h4">{{ stats.courses_count }}</p>
+                    </div>
+                    <i class="bi bi-book fs-1"></i>
+                </div>
+                <a href="{{ url_for('admin_courses') }}" class="stretched-link text-white text-decoration-none"></a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-white bg-warning">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title">Current Semester</h6>
+                        <p class="card-text h4">{{ current_semester.name if current_semester else 'Not set' }}</p>
+                    </div>
+                    <i class="bi bi-calendar3 fs-1"></i>
+                </div>
+                {% if current_semester %}
+                <a href="{{ url_for('admin_semesters') }}?semester_id={{ current_semester.semester_id }}" class="stretched-link text-white text-decoration-none"></a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-white bg-danger">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title">Overdue Books</h6>
+                        <p class="card-text h4">{{ stats.overdue_books }}</p>
+                    </div>
+                    <i class="bi bi-exclamation-triangle fs-1"></i>
+                </div>
+                <a href="{{ url_for('admin_library_loans') }}?status=active" class="stretched-link text-white text-decoration-none"></a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Main Content Column -->
+    <div class="col-lg-8">
+        <!-- Current Semester Courses -->
+        {% if current_semester %}
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Current Semester Courses</h5>
+                <div>
+                    <a href="{{ url_for('admin_sections') }}?semester_id={{ current_semester.semester_id }}" class="btn btn-sm btn-outline-secondary me-2">View All</a>
+                    <a href="{{ url_for('create_section') }}" class="btn btn-sm btn-primary">Add Section</a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Course</th>
+                                <th class="text-center">Sections</th>
+                                <th class="text-center">Enrollments</th>
+                                <th>Instructor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for course in current_courses %}
+                            <tr>
+                                <td>{{ course.title }}</td>
+                                <td class="text-center">{{ course.section_count }}</td>
+                                <td class="text-center">{{ course.enrollment_count }}</td>
+                                <td>{{ course.instructor_name or 'TBA' }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-3 text-muted">
+                                    <i class="bi bi-book fs-3"></i>
+                                    <p class="mt-2">No courses in current semester</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Sidebar Column -->
+    <div class="col-lg-4">
+        <!-- Quick Actions Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('create_user') }}" class="btn btn-outline-primary text-start">
+                        <i class="bi bi-person-plus me-2"></i> Add New User
+                    </a>
+                    <a href="{{ url_for('create_course') }}" class="btn btn-outline-primary text-start">
+                        <i class="bi bi-journal-plus me-2"></i> Create Course
+                    </a>
+                    <a href="{{ url_for('create_section') }}" class="btn btn-outline-primary text-start">
+                        <i class="bi bi-calendar-plus me-2"></i> Schedule Class
+                    </a>
+                    <a href="{{ url_for('create_financial_record') }}" class="btn btn-outline-primary text-start">
+                        <i class="bi bi-cash-coin me-2"></i> Create Financial Record
+                    </a>
+                    <a href="{{ url_for('create_book') }}" class="btn btn-outline-primary text-start">
+                        <i class="bi bi-bookmark-plus me-2"></i> Add Library Book
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .system-status-badges .badge {
+        font-size: 0.9rem;
+        padding: 0.5rem 0.75rem;
+        display: inline-flex;
+        align-items: center;
+    }
+    .system-status-badges .badge i {
+        margin-right: 0.3rem;
+    }
+</style>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-refresh dashboard every 5 minutes
+setTimeout(function(){
+    window.location.reload();
+}, 300000);
+
+// Initialize tooltips
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+    
+    // Add tooltips to system status badges
+    new bootstrap.Tooltip(document.querySelector('.system-status-badges .bg-primary'))
+    new bootstrap.Tooltip(document.querySelector('.system-status-badges .bg-success'))
+    new bootstrap.Tooltip(document.querySelector('.system-status-badges .bg-warning'))
+    new bootstrap.Tooltip(document.querySelector('.system-status-badges .bg-danger'))
+});
+</script>
+{% endblock %}

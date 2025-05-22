@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Exam Results{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Exam Results</h2>
+    
+    {% if not current_semester %}
+        <div class="alert alert-warning">No current semester found.</div>
+    {% else %}
+        <p>Showing Marks for <strong>{{ current_semester.name }}</strong></p>
+
+        {% for course in courses %}
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4>{{ course.title }} (Section {{ exam_results[course.course_id].section_number }})</h4>
+                {% if exam_results[course.course_id].final_result %}
+                <span class="badge bg-success">Final Grade: {{ exam_results[course.course_id].final_result }}%</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if exam_results[course.course_id].exams %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Component</th>
+                                <th>Score</th>
+                                <th>Weight</th>
+                                <th>Percentage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set exam = exam_results[course.course_id].exams[0] %}
+                            {% if exam.mid1 is not none %}
+                            <tr>
+                                <td>Midterm 1</td>
+                                <td>{{ exam.mid1 }}</td>
+                                <td>20%</td>
+                                <td>{{ (exam.mid1 / 100 * 20)|round(2) }}%</td>
+                            </tr>
+                            {% endif %}
+                            {% if exam.mid2 is not none %}
+                            <tr>
+                                <td>Midterm 2</td>
+                                <td>{{ exam.mid2 }}</td>
+                                <td>20%</td>
+                                <td>{{ (exam.mid2 / 100 * 20)|round(2) }}%</td>
+                            </tr>
+                            {% endif %}
+                            {% if exam.project is not none %}
+                            <tr>
+                                <td>Project</td>
+                                <td>{{ exam.project }}</td>
+                                <td>15%</td>
+                                <td>{{ (exam.project / 100 * 15)|round(2) }}%</td>
+                            </tr>
+                            {% endif %}
+                            {% if exam.quizzes is not none %}
+                            <tr>
+                                <td>Quizzes</td>
+                                <td>{{ exam.quizzes }}</td>
+                                <td>15%</td>
+                                <td>{{ (exam.quizzes / 100 * 15)|round(2) }}%</td>
+                            </tr>
+                            {% endif %}
+                            {% if exam.assignments is not none %}
+                            <tr>
+                                <td>Assignments</td>
+                                <td>{{ exam.assignments }}</td>
+                                <td>10%</td>
+                                <td>{{ (exam.assignments / 100 * 10)|round(2) }}%</td>
+                            </tr>
+                            {% endif %}
+                            {% if exam.final_exam is not none %}
+                            <tr>
+                                <td>Final Exam</td>
+                                <td>{{ exam.final_exam }}</td>
+                                <td>20%</td>
+                                <td>{{ (exam.final_exam / 100 * 20)|round(2) }}%</td>
+                            </tr>
+                            {% endif %}
+                            <tr class="table-active">
+                                <td><strong>Total</strong></td>
+                                <td></td>
+                                <td><strong>100%</strong></td>
+                                <td><strong>{{ exam.final_result }}%</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">No exam results available for this course.</div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}

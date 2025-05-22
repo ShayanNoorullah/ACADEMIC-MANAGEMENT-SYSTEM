@@ -1,0 +1,80 @@
+{% extends 'teacher/base.html' %}
+{% block title %}Assignments{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">Assignments</h2>
+
+    <form method="POST" enctype="multipart/form-data">
+        <div class="row g-3 mb-3">
+            <div class="col-md-4">
+                <label class="form-label">Course Section</label>
+                <select name="section_id" class="form-select" required>
+                    <option selected disabled>Select Section</option>
+                    {% for section in sections %}
+                        <option value="{{ section.section_number }}">
+                            {{ section.course_title }} (Section {{ section.section_number }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Assignment Title</label>
+                <input type="text" name="title" class="form-control" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Due Date</label>
+                <input type="datetime-local" name="due_date" class="form-control" required>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="form-label">Description</label>
+                <textarea name="description" class="form-control" rows="3"></textarea>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Max Points</label>
+                <input type="number" name="max_points" class="form-control" step="0.01" required>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Upload File</label>
+                <input type="file" name="file" class="form-control" accept=".pdf,.docx,.txt,.zip">
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Create Assignment</button>
+    </form>
+
+    {% if assignments %}
+    <hr class="my-4">
+    <h4>Existing Assignments</h4>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">Title</th>
+                    <th scope="col">Due Date</th>
+                    <th scope="col">Max Points</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for assignment in assignments %}
+                <tr>
+                    <td>{{ assignment.title }}</td>
+                    <td>{{ assignment.due_date }}</td>
+                    <td>{{ assignment.max_points }}</td>
+                    <td>
+                        <a href="{{ url_for('edit_assignment', assignment_id=assignment.assignment_id) }}" class="btn btn-warning">Edit</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="mt-4 text-muted">No assignments found.</p>
+    {% endif %}
+</div>
+{% endblock %}

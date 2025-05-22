@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+{% block title %}Grade Submission{% endblock %}
+
+{% block header %}Grade Submission{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Course</label>
+                    <select class="form-select" name="course_id" required onchange="this.form.submit()">
+                        <option value="">-- Select Course --</option>
+                        {% for sec in assigned_sections %}
+                            {% if not loop.previtem or loop.previtem.course_id != sec.course_id %}
+                                <option value="{{ sec.course_id }}" {% if sec.course_id|string == request.args.get('course_id') %}selected{% endif %}>
+                                    {{ sec.title }}
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                {% if request.args.get('course_id') %}
+                <div class="col-md-4">
+                    <label class="form-label">Section</label>
+                    <select class="form-select" name="section_number" required onchange="this.form.submit()">
+                        <option value="">-- Select Section --</option>
+                        {% for sec in assigned_sections if sec.course_id|string == request.args.get('course_id') %}
+                            <option value="{{ sec.section_number }}" {% if sec.section_number|string == request.args.get('section_number') %}selected{% endif %}>
+                                Section {{ sec.section_number }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+                {% if request.args.get('section_number') %}
+                <div class="col-md-4">
+                    <label class="form-label">Student</label>
+                    <select class="form-select" name="student_id" required onchange="this.form.submit()">
+                        <option value="">-- Select Student --</option>
+                        {% for student in students %}
+                            <option value="{{ student.student_id }}" {% if student.student_id|string == request.args.get('student_id') %}selected{% endif %}>
+                                {{ student.first_name }} {{ student.last_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if request.args.get('course_id') and request.args.get('section_number') and request.args.get('student_id') %}
+<form method="POST">
+    <input type="hidden" name="student_id" value="{{ request.args.get('student_id') }}">
+    <input type="hidden" name="course_id" value="{{ request.args.get('course_id') }}">
+    <input type="hidden" name="section_number" value="{{ request.args.get('section_number') }}">
+    <input type="hidden" name="semester_id" value="{{ selected_semester }}">
+    
+    {% for section in ['mid1', 'mid2', 'final_exam'] %}
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            {{ section|replace('_', ' ')|title }}
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Question</th>
+                            <th>Obtained</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="{{ section }}-tbody">
+                        <tr>
+                            <td><input type="text" class="form-control" name="{{ section }}_question_0" value="Q1" readonly></td>
+                            <td><input type="number" class="form-control" name="{{ section }}_obtained_0" step="0.01" min="0"></td>
+                            <td><input type="number" class="form-control" name="{{ section }}_total_0" step="0.01" min="0"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addRow('{{ section }}')">
+                <i class="bi bi-plus-circle me-1"></i> Add Question
+            </button>
+        </div>
+    </div>
+    {% endfor %}
+
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            Quizzes
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Quiz</th>
+                            <th>Obtained</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="quizzes-tbody">
+                        <tr>
+                            <td><input type="text" class="form-control" name="quizzes_quiz_0" value="Quiz 1" readonly></td>
+                            <td><input type="number" class="form-control" name="quizzes_obtained_0" step="0.01" min="0"></td>
+                            <td><input type="number" class="form-control" name="quizzes_total_0" step="0.01" min="0"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addRow('quizzes')">
+                <i class="bi bi-plus-circle me-1"></i> Add Quiz
+            </button>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            Assignments
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Assignment</th>
+                            <th>Obtained</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="assignments-tbody">
+                        <tr>
+                            <td><input type="text" class="form-control" name="assignments_assignment_0" value="Assignment 1" readonly></td>
+                            <td><input type="number" class="form-control" name="assignments_obtained_0" step="0.01" min="0"></td>
+                            <td><input type="number" class="form-control" name="assignments_total_0" step="0.01" min="0"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addRow('assignments')">
+                <i class="bi bi-plus-circle me-1"></i> Add Assignment
+            </button>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            Project
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Component</th>
+                            <th>Obtained</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="project-tbody">
+                        <tr>
+                            <td><input type="text" class="form-control" name="project_component_0" value="Project" readonly></td>
+                            <td><input type="number" class="form-control" name="project_obtained_0" step="0.01" min="0"></td>
+                            <td><input type="number" class="form-control" name="project_total_0" step="0.01" min="0"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-grid">
+        <button type="submit" class="btn btn-success btn-lg">
+            <i class="bi bi-save me-1"></i> Submit Grades
+        </button>
+    </div>
+</form>
+{% endif %}
+
+<script>
+function addRow(section) {
+    const tbody = document.getElementById(${section}-tbody);
+    const index = tbody.rows.length;
+    let label, inputName;
+
+    switch(section) {
+        case 'quizzes':
+            label = Quiz ${index + 1};
+            inputName = ${section}_quiz_${index};
+            break;
+        case 'assignments':
+            label = Assignment ${index + 1};
+            inputName = ${section}_assignment_${index};
+            break;
+        case 'project':
+            label = Component ${index + 1};
+            inputName = ${section}_component_${index};
+            break;
+        default:
+            label = Q${index + 1};
+            inputName = ${section}_question_${index};
+    }
+
+    const row = document.createElement('tr');
+    row.innerHTML = `
+        <td><input type="text" class="form-control" name="${inputName}" value="${label}" readonly></td>
+        <td><input type="number" class="form-control" name="${section}obtained${index}" step="0.01" min="0"></td>
+        <td><input type="number" class="form-control" name="${section}total${index}" step="0.01" min="0"></td>
+    `;
+    tbody.appendChild(row);
+}
+</script>
+{% endblock %}

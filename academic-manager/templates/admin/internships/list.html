@@ -1,0 +1,124 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Internship Management{% endblock %}
+{% block header %}Internship Management{% endblock %}
+
+{% block actions %}
+    <a href="{{ url_for('create_internship') }}" class="btn btn-sm btn-outline-primary">
+        <i class="bi bi-plus-lg"></i> Add Internship
+    </a>
+{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <select name="status" class="form-select">
+                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Statuses</option>
+                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+                    <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+                </select>
+            </div>
+            <div class="col-md-7">
+                <input type="text" name="search" class="form-control" 
+                       placeholder="Search by title, company, or location" 
+                       value="{{ search }}">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Search</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Company</th>
+                <th>Location</th>
+                <th>Dates</th>
+                <th>Deadline</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for internship in internships %}
+            <tr>
+                <td>{{ internship.title }}</td>
+                <td>{{ internship.company }}</td>
+                <td>{{ internship.location }}</td>
+                <td>
+                    {{ internship.start_date.strftime('%b %d, %Y') }} - 
+                    {{ internship.end_date.strftime('%b %d, %Y') }}
+                </td>
+                <td>{{ internship.application_deadline.strftime('%b %d, %Y') }}</td>
+                <td>
+                    <span class="badge bg-{% if internship.is_active %}success{% else %}secondary{% endif %}">
+                        {% if internship.is_active %}Active{% else %}Inactive{% endif %}
+                    </span>
+                </td>
+                <td>
+                    <div class="btn-group btn-group-sm">
+                        <a href="{{ url_for('edit_internship', inter_id=internship.inter_id) }}" class="btn btn-outline-primary">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <form method="post" action="{{ url_for('delete_internship', inter_id=internship.inter_id) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this internship?');">
+                            <button type="submit" class="btn btn-outline-danger">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" class="text-center py-4">
+                    <div class="text-muted">
+                        <i class="bi bi-exclamation-circle fs-1"></i>
+                        <p class="mt-2 mb-0">No internships found</p>
+                        {% if search or status_filter != 'all' %}
+                        <p class="small">Try adjusting your search filters</p>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination -->
+{% if pagination.pages > 1 %}
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center mt-4">
+        {% if pagination.page > 1 %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('admin_internships', page=pagination.page-1, status=status_filter, search=search) }}" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        {% endif %}
+        
+        {% for p in range(1, pagination.pages + 1) %}
+        <li class="page-item {% if p == pagination.page %}active{% endif %}">
+            <a class="page-link" href="{{ url_for('admin_internships', page=p, status=status_filter, search=search) }}">
+                {{ p }}
+            </a>
+        </li>
+        {% endfor %}
+        
+        {% if pagination.page < pagination.pages %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('admin_internships', page=pagination.page+1, status=status_filter, search=search) }}" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}
