@@ -2,7 +2,7 @@
 
 A Flask-based web application with database SQL for managing academic activities with three distinct portals: Student, Teacher, and Admin.
 
-![image]([https://github.com/user-attachments/assets/d847c832-2089-4b7e-8655-59f909e5fdce](https://github.com/ShayanNoorullah/ACADEMIC-MANAGEMENT-SYSTEM/blob/main/carrent.png)
+![image](https://github.com/ShayanNoorullah/ACADEMIC-MANAGEMENT-SYSTEM/blob/main/carrent.png)
 
 ## Features
 
